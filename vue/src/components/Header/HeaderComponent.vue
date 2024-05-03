@@ -16,15 +16,9 @@
 import { ref, shallowRef, onBeforeUnmount, defineEmits, watch, getCurrentInstance } from 'vue'
 import { baseURL } from '@/plugins/axios'
 import { router } from '@/router/index'
-const { proxy } = getCurrentInstance()
 
 
 const activeIndex = ref('/Home')
-const username = ref(localStorage.getItem('system_username'))
-
-const props = defineProps({})
-
-const role = ref(localStorage.getItem('system_userRole'))
 
 watch(
   () => router.currentRoute.value.path,
@@ -42,7 +36,7 @@ let routes: any
 
 const changeRoute = () => {
   routes = router.getRoutes().filter((route: any) => {
-    return route.meta && route.meta.title && route.meta.role?.includes(role.value)
+    return route.meta && route.meta.title
   })
 
   routes = routes.sort((a: { meta: { orderNum: number; }; }, b: { meta: { orderNum: number; }; }) => {
@@ -50,25 +44,6 @@ const changeRoute = () => {
   })
 }
 changeRoute()
-const toLogin = () => {
-  router.push('/Login')
-}
-
-const logout = () => {
-  localStorage.removeItem('system_sa_token')
-  username.value = null
-  router.push('/Login')
-}
-proxy.$bus.on('setUserName', (data: string) => {
-  username.value = data
-  localStorage.setItem('system_username', data)
-})
-
-proxy.$bus.on('setUserRole', (data: string) => {
-  role.value = data
-  localStorage.setItem('system_userRole', data)
-  changeRoute()
-})
 </script>
 
 <style scoped>

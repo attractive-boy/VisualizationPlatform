@@ -1,6 +1,5 @@
 export default {
-  title: '案件管理',
+  title: '全国高考数据分析',
   orderNum: 2,
-  keepAlive: true,
-  role: ['user']
+  keepAlive: true
 }

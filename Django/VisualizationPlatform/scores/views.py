@@ -15,9 +15,17 @@ from drf_yasg import openapi
     properties={
         'year': openapi.Schema(type=openapi.TYPE_INTEGER),
         'score': openapi.Schema(type=openapi.TYPE_NUMBER),
-        'subject': openapi.Schema(type=openapi.TYPE_STRING),
         'province': openapi.Schema(type=openapi.TYPE_STRING),
         'city': openapi.Schema(type=openapi.TYPE_STRING),
+        'language': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'mathematics': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'english': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'chemistry': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'physics': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'biology': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'geography': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'politics': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'history': openapi.Schema(type=openapi.TYPE_NUMBER),
     }
 ))
 @api_view(['POST'])
@@ -28,21 +36,37 @@ def create_score(request):
 
     Parameters:
     - year (int): The year of the score.
-    - score (float): The score value.
-    - subject (str): The subject of the score.
+    - score (float): The total score value.
     - province (str): The province of the score.
     - city (str): The city of the score.
+    - language (float): The score of language subject.
+    - mathematics (float): The score of mathematics subject.
+    - english (float): The score of english subject.
+    - chemistry (float): The score of chemistry subject.
+    - physics (float): The score of physics subject.
+    - biology (float): The score of biology subject.
+    - geography (float): The score of geography subject.
+    - politics (float): The score of politics subject.
+    - history (float): The score of history subject.
     """
     if request.method == 'POST':
         # 从请求中获取数据
-        data = request.POST
+        data = request.data
         # 创建成绩对象
         score = Score.objects.create(
             year=data.get('year'),
             score=data.get('score'),
-            subject=data.get('subject'),
             province=data.get('province'),
-            city=data.get('city')
+            city=data.get('city'),
+            language=data.get('language'),
+            mathematics=data.get('mathematics'),
+            english=data.get('english'),
+            chemistry=data.get('chemistry'),
+            physics=data.get('physics'),
+            biology=data.get('biology'),
+            geography=data.get('geography'),
+            politics=data.get('politics'),
+            history=data.get('history'),
         )
         return JsonResponse({'message': 'Score created successfully'})
     else:
@@ -53,9 +77,17 @@ def create_score(request):
     properties={
         'year': openapi.Schema(type=openapi.TYPE_INTEGER),
         'score': openapi.Schema(type=openapi.TYPE_NUMBER),
-        'subject': openapi.Schema(type=openapi.TYPE_STRING),
         'province': openapi.Schema(type=openapi.TYPE_STRING),
         'city': openapi.Schema(type=openapi.TYPE_STRING),
+        'language': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'mathematics': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'english': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'chemistry': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'physics': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'biology': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'geography': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'politics': openapi.Schema(type=openapi.TYPE_NUMBER),
+        'history': openapi.Schema(type=openapi.TYPE_NUMBER),
     }
 ))
 @api_view(['POST'])
@@ -66,10 +98,18 @@ def update_score(request, score_id):
 
     Parameters:
     - year (int): The year of the score.
-    - score (float): The score value.
-    - subject (str): The subject of the score.
+    - score (float): The total score value.
     - province (str): The province of the score.
     - city (str): The city of the score.
+    - language (float): The score of language subject.
+    - mathematics (float): The score of mathematics subject.
+    - english (float): The score of english subject.
+    - chemistry (float): The score of chemistry subject.
+    - physics (float): The score of physics subject.
+    - biology (float): The score of biology subject.
+    - geography (float): The score of geography subject.
+    - politics (float): The score of politics subject.
+    - history (float): The score of history subject.
     """
     try:
         score = Score.objects.get(id=score_id)
@@ -77,73 +117,25 @@ def update_score(request, score_id):
         return JsonResponse({'error': 'Score does not exist'}, status=404)
 
     if request.method == 'POST':
-        data = request.POST
+        data = request.data
         score.year = data.get('year')
         score.score = data.get('score')
-        score.subject = data.get('subject')
         score.province = data.get('province')
         score.city = data.get('city')
+        score.language = data.get('language')
+        score.mathematics = data.get('mathematics')
+        score.english = data.get('english')
+        score.chemistry = data.get('chemistry')
+        score.physics = data.get('physics')
+        score.biology = data.get('biology')
+        score.geography = data.get('geography')
+        score.politics = data.get('politics')
+        score.history = data.get('history')
         score.save()
         return JsonResponse({'message': 'Score updated successfully'})
     else:
         return JsonResponse({'error': 'Only POST requests are allowed'}, status=400)
 
-@swagger_auto_schema(method='delete')
-@api_view(['DELETE'])
-@permission_classes([AllowAny])  # 或者使用 IsAuthenticated
-def delete_score(request, score_id):
-    """
-    Delete an existing score entry.
-    """
-    try:
-        score = Score.objects.get(id=score_id)
-    except Score.DoesNotExist:
-        return JsonResponse({'error': 'Score does not exist'}, status=404)
-
-    if request.method == 'DELETE':
-        score.delete()
-        return JsonResponse({'message': 'Score deleted successfully'})
-    else:
-        return JsonResponse({'error': 'Only DELETE requests are allowed'}, status=400)
-
-@swagger_auto_schema(method='get', responses={200: openapi.Schema(
-    type=openapi.TYPE_OBJECT,
-    properties={
-        'year': openapi.Schema(type=openapi.TYPE_INTEGER),
-        'score': openapi.Schema(type=openapi.TYPE_NUMBER),
-        'subject': openapi.Schema(type=openapi.TYPE_STRING),
-        'province': openapi.Schema(type=openapi.TYPE_STRING),
-        'city': openapi.Schema(type=openapi.TYPE_STRING),
-    }
-)})
-@api_view(['GET'])
-@permission_classes([AllowAny])  # 或者使用 IsAuthenticated
-def get_score(request, score_id):
-    """
-    Get details of a specific score entry.
-
-    Parameters:
-    - score_id (int): The ID of the score entry.
-    """
-    try:
-        score = Score.objects.get(id=score_id)
-    except Score.DoesNotExist:
-        return JsonResponse({'error': 'Score does not exist'}, status=404)
-
-    if request.method == 'GET':
-        data = {
-            'year': score.year,
-            'score': score.score,
-            'subject': score.subject,
-            'province': score.province,
-            'city': score.city
-        }
-        return JsonResponse(data)
-    else:
-        return JsonResponse({'error': 'Only GET requests are allowed'}, status=400)
-
-
-# 在视图函数中实现分页查询
 @swagger_auto_schema(method='get', manual_parameters=[
     openapi.Parameter('page', openapi.IN_QUERY, type=openapi.TYPE_INTEGER, description='Page number')
 ])
@@ -182,11 +174,20 @@ def get_scores(request):
     results = []
     for score in scores_page:
         results.append({
+            'id': score.id,  # Include the id field
             'year': score.year,
             'score': score.score,
-            'subject': score.subject,
             'province': score.province,
-            'city': score.city
+            'city': score.city,
+            'language': score.language,
+            'mathematics': score.mathematics,
+            'english': score.english,
+            'chemistry': score.chemistry,
+            'physics': score.physics,
+            'biology': score.biology,
+            'geography': score.geography,
+            'politics': score.politics,
+            'history': score.history,
         })
 
     # 返回分页查询结果
@@ -196,4 +197,22 @@ def get_scores(request):
         'previous': scores_page.previous_page_number() if scores_page.has_previous() else None,
         'results': results
     })
-      
+
+@swagger_auto_schema(method='delete')
+@api_view(['DELETE'])
+@permission_classes([AllowAny])  # 或者使用 IsAuthenticated
+def delete_score(request, score_id):
+    """
+    Delete an existing score entry.
+    """
+    try:
+        score = Score.objects.get(id=score_id)
+    except Score.DoesNotExist:
+        return JsonResponse({'error': 'Score does not exist'}, status=404)
+
+    if request.method == 'DELETE':
+        score.delete()
+        return JsonResponse({'message': 'Score deleted successfully'})
+    else:
+        return JsonResponse({'error': 'Only DELETE requests are allowed'}, status=400)
+

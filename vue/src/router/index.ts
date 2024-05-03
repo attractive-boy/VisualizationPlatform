@@ -28,7 +28,7 @@ const routes: Array<RouteRecordRaw> = Object.entries(routeModules).map((i) => {
 // 添加默认路由
 routes.push({
   path: '/',
-  redirect: '/home' // 这里将默认路由重定向到您指定的首页路径
+  redirect: '/Login' // 这里将默认路由重定向到您指定的首页路径
 })
 
 export const router = createRouter({
