@@ -24,15 +24,18 @@ def subject_avg_score_bar_chart(request):
     subjects = ['language_score', 'mathematics_score', 'english_score', 'chemistry_score', 'physics_score', 'biology_score', 'geography_score', 'politics_score', 'history_score']
     avg_scores_by_year = []
     for year in years:
+        liberal_arts_count = ScoreStatistics.objects.filter(year=year).aggregate(liberal_arts_count=models.Sum('liberal_arts_count'))['liberal_arts_count']
+        science_count = ScoreStatistics.objects.filter(year=year).aggregate(science_count=models.Sum('science_count'))['science_count']
         avg_scores = {'year': year}
         for subject in subjects:
             total_score_sum = ScoreStatistics.objects.filter(year=year).aggregate(total_score_sum=models.Sum(subject))['total_score_sum']
             data_count_sum = ScoreStatistics.objects.filter(year=year).aggregate(data_count_sum=models.Sum('data_count'))['data_count_sum']
             if total_score_sum is not None and data_count_sum is not None and data_count_sum != 0:
-                avg_score = total_score_sum / data_count_sum
+                if subject in ['language_score', 'politics_score', 'history_score']:
+                    avg_score = total_score_sum / liberal_arts_count if liberal_arts_count != 0 else 0
+                else:
+                    avg_score = total_score_sum / science_count if science_count != 0 else 0
                 avg_scores[subject.replace('_score', '')] = avg_score
-            else:
-                avg_scores[subject.replace('_score', '')] = 0
         avg_scores_by_year.append(avg_scores)
     data = {'subject_avg_score_bar_chart': avg_scores_by_year}
     return JsonResponse(data)
@@ -54,11 +57,16 @@ def national_pass_rate_trend(request):
 def subject_avg_score_by_year(request, year):
     subjects = ['language_score', 'mathematics_score', 'english_score', 'chemistry_score', 'physics_score', 'biology_score', 'geography_score', 'politics_score', 'history_score']
     avg_scores = {}
+    liberal_arts_count = ScoreStatistics.objects.filter(year=year).aggregate(liberal_arts_count=models.Sum('liberal_arts_count'))['liberal_arts_count']
+    science_count = ScoreStatistics.objects.filter(year=year).aggregate(science_count=models.Sum('science_count'))['science_count']
     for subject in subjects:
-        total_score_sum = ScoreStatistics.objects.filter(year=year).aggregate(total_score_sum=models.Sum(subject))[f'{subject}_sum']
+        total_score_sum = ScoreStatistics.objects.filter(year=year).aggregate(total_score_sum=models.Sum(subject))['total_score_sum']
         data_count_sum = ScoreStatistics.objects.filter(year=year).aggregate(data_count_sum=models.Sum('data_count'))['data_count_sum']
         if total_score_sum and data_count_sum:
-            avg_score = total_score_sum / data_count_sum
+            if subject in ['language_score', 'politics_score', 'history_score']:
+                avg_score = total_score_sum / liberal_arts_count if liberal_arts_count != 0 else 0
+            else:
+                avg_score = total_score_sum / science_count if science_count != 0 else 0
             avg_scores[subject.replace('_score', '')] = avg_score
     data = {'subject_avg_score_by_year': avg_scores}
     return JsonResponse(data)
@@ -80,7 +88,6 @@ def area_average_score_trend(request):
     data = {'area_average_score_trend': avg_scores_by_province}
     return JsonResponse(data)
 
-
 # 2.2 具体地区对应的不同年份的各科成绩平均分柱状图
 def subject_avg_score_by_area(request):
     subjects = ['language_score', 'mathematics_score', 'english_score', 'chemistry_score', 'physics_score', 'biology_score', 'geography_score', 'politics_score', 'history_score']
@@ -93,19 +100,22 @@ def subject_avg_score_by_area(request):
         avg_scores_by_year = {}
         for year in years:
             avg_scores = {}
+            liberal_arts_count = ScoreStatistics.objects.filter(province=province, year=year).aggregate(liberal_arts_count=models.Sum('liberal_arts_count'))['liberal_arts_count']
+            science_count = ScoreStatistics.objects.filter(province=province, year=year).aggregate(science_count=models.Sum('science_count'))['science_count']
             for subject in subjects:
                 total_score_sum = ScoreStatistics.objects.filter(province=province, year=year).aggregate(total_score_sum=models.Sum(subject))['total_score_sum']
                 data_count_sum = ScoreStatistics.objects.filter(province=province, year=year).aggregate(data_count_sum=models.Sum('data_count'))['data_count_sum']
                 if total_score_sum is not None and data_count_sum is not None and data_count_sum != 0:
-                    avg_score = total_score_sum / data_count_sum
+                    if subject in ['language_score', 'politics_score', 'history_score']:
+                        avg_score = total_score_sum / liberal_arts_count if liberal_arts_count != 0 else 0
+                    else:
+                        avg_score = total_score_sum / science_count if science_count != 0 else 0
                     avg_scores[subject.replace('_score', '')] = avg_score
             avg_scores_by_year[year] = avg_scores
         avg_scores_by_area[province] = avg_scores_by_year
 
     data = {'subject_avg_score_by_area': avg_scores_by_area}
     return JsonResponse(data)
-
-
 
 # 2.3 具体地区对应的不同年份的高考及格率趋势折线图
 def area_pass_rate_trend(request):
@@ -116,6 +126,8 @@ def area_pass_rate_trend(request):
     for province in provinces:
         pass_rates_by_year = []
         for year in years:
+            liberal_arts_count = ScoreStatistics.objects.filter(province=province, year=year).aggregate(liberal_arts_count=models.Sum('liberal_arts_count'))['liberal_arts_count']
+            science_count = ScoreStatistics.objects.filter(province=province, year=year).aggregate(science_count=models.Sum('science_count'))['science_count']
             total_count = ScoreStatistics.objects.filter(province=province, year=year).aggregate(total_count=models.Sum('data_count'))['total_count']
             pass_count = ScoreStatistics.objects.filter(province=province, year=year).aggregate(pass_count=models.Sum('pass_count'))['pass_count']
             if total_count is not None and total_count != 0:
@@ -137,11 +149,16 @@ def subject_avg_score_by_area_and_year(request):
         avg_scores_by_year = {}
         for year in years:
             avg_scores = {}
+            liberal_arts_count = ScoreStatistics.objects.filter(province=province, year=year).aggregate(liberal_arts_count=models.Sum('liberal_arts_count'))['liberal_arts_count']
+            science_count = ScoreStatistics.objects.filter(province=province, year=year).aggregate(science_count=models.Sum('science_count'))['science_count']
             for subject in subjects:
                 total_score_sum = ScoreStatistics.objects.filter(province=province, year=year).aggregate(total_score_sum=models.Sum(subject))['total_score_sum']
                 data_count_sum = ScoreStatistics.objects.filter(province=province, year=year).aggregate(data_count_sum=models.Sum('data_count'))['data_count_sum']
                 if total_score_sum is not None and data_count_sum is not None and data_count_sum != 0:
-                    avg_score = total_score_sum / data_count_sum
+                    if subject in ['language_score', 'politics_score', 'history_score']:
+                        avg_score = total_score_sum / liberal_arts_count if liberal_arts_count != 0 else 0
+                    else:
+                        avg_score = total_score_sum / science_count if science_count != 0 else 0
                     avg_scores[subject.replace('_score', '')] = avg_score
             avg_scores_by_year[year] = avg_scores
         avg_scores_by_area_and_year[province] = avg_scores_by_year
@@ -157,6 +174,8 @@ def city_average_score_trend(request):
     for city in cities:
         avg_scores_by_year = []
         for year in years:
+            liberal_arts_count = ScoreStatistics.objects.filter(city=city, year=year).aggregate(liberal_arts_count=models.Sum('liberal_arts_count'))['liberal_arts_count']
+            science_count = ScoreStatistics.objects.filter(city=city, year=year).aggregate(science_count=models.Sum('science_count'))['science_count']
             total_score_sum = ScoreStatistics.objects.filter(city=city, year=year).aggregate(total_score_sum=models.Sum('total_score'))['total_score_sum']
             data_count_sum = ScoreStatistics.objects.filter(city=city, year=year).aggregate(data_count_sum=models.Sum('data_count'))['data_count_sum']
             if total_score_sum and data_count_sum:
@@ -176,11 +195,16 @@ def subject_avg_score_by_city(request):
         avg_scores_by_year = {}
         for year in years:
             avg_scores = {}
+            liberal_arts_count = ScoreStatistics.objects.filter(city=city, year=year).aggregate(liberal_arts_count=models.Sum('liberal_arts_count'))['liberal_arts_count']
+            science_count = ScoreStatistics.objects.filter(city=city, year=year).aggregate(science_count=models.Sum('science_count'))['science_count']
             for subject in subjects:
                 total_score_sum = ScoreStatistics.objects.filter(city=city, year=year).aggregate(total_score_sum=models.Sum(subject))['total_score_sum']
                 data_count_sum = ScoreStatistics.objects.filter(city=city, year=year).aggregate(data_count_sum=models.Sum('data_count'))['data_count_sum']
-                if total_score_sum and data_count_sum:
-                    avg_score = total_score_sum / data_count_sum
+                if total_score_sum is not None and data_count_sum is not None and data_count_sum != 0:
+                    if subject in ['language_score', 'politics_score', 'history_score']:
+                        avg_score = total_score_sum / liberal_arts_count if liberal_arts_count != 0 else 0
+                    else:
+                        avg_score = total_score_sum / science_count if science_count != 0 else 0
                     avg_scores[subject.replace('_score', '')] = avg_score
             avg_scores_by_year[year] = avg_scores
         avg_scores_by_city_and_year[city] = avg_scores_by_year
@@ -195,9 +219,11 @@ def city_pass_rate_trend(request):
     for city in cities:
         pass_rates_by_year = []
         for year in years:
+            liberal_arts_count = ScoreStatistics.objects.filter(city=city, year=year).aggregate(liberal_arts_count=models.Sum('liberal_arts_count'))['liberal_arts_count']
+            science_count = ScoreStatistics.objects.filter(city=city, year=year).aggregate(science_count=models.Sum('science_count'))['science_count']
             total_count = ScoreStatistics.objects.filter(city=city, year=year).aggregate(total_count=models.Sum('data_count'))['total_count']
             pass_count = ScoreStatistics.objects.filter(city=city, year=year).aggregate(pass_count=models.Sum('pass_count'))['pass_count']
-            if total_count:
+            if total_count is not None and total_count != 0:
                 pass_rate = pass_count / total_count
                 pass_rates_by_year.append({'year': year, 'pass_rate': pass_rate})
         pass_rates_by_city_and_year[city] = pass_rates_by_year
@@ -214,15 +240,18 @@ def subject_avg_score_by_city_and_year(request):
         avg_scores_by_year = {}
         for year in years:
             avg_scores = {}
+            liberal_arts_count = ScoreStatistics.objects.filter(city=city, year=year).aggregate(liberal_arts_count=models.Sum('liberal_arts_count'))['liberal_arts_count']
+            science_count = ScoreStatistics.objects.filter(city=city, year=year).aggregate(science_count=models.Sum('science_count'))['science_count']
             for subject in subjects:
                 total_score_sum = ScoreStatistics.objects.filter(city=city, year=year).aggregate(total_score_sum=models.Sum(subject))['total_score_sum']
                 data_count_sum = ScoreStatistics.objects.filter(city=city, year=year).aggregate(data_count_sum=models.Sum('data_count'))['data_count_sum']
-                if total_score_sum and data_count_sum:
-                    avg_score = total_score_sum / data_count_sum
+                if total_score_sum is not None and data_count_sum is not None and data_count_sum != 0:
+                    if subject in ['language_score', 'politics_score', 'history_score']:
+                        avg_score = total_score_sum / liberal_arts_count if liberal_arts_count != 0 else 0
+                    else:
+                        avg_score = total_score_sum / science_count if science_count != 0 else 0
                     avg_scores[subject.replace('_score', '')] = avg_score
             avg_scores_by_year[year] = avg_scores
         avg_scores_by_city_and_year[city] = avg_scores_by_year
     data = {'subject_avg_score_by_city_and_year': avg_scores_by_city_and_year}
     return JsonResponse(data)
-
-

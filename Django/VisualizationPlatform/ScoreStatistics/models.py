@@ -16,6 +16,8 @@ class ScoreStatistics(models.Model):
     geography_score = models.DecimalField(max_digits=65, decimal_places=2)
     politics_score = models.DecimalField(max_digits=65, decimal_places=2)
     history_score = models.DecimalField(max_digits=65, decimal_places=2)
+    liberal_arts_count = models.IntegerField()  # 文科生数量
+    science_count = models.IntegerField()  # 理科生数量
 
     def __str__(self):
         return f"{self.year} - {self.province} - {self.city}"
